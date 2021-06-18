@@ -54,6 +54,34 @@ if(document.getElementById("addTask")){
 }
 */
 
+function getSettings(){
+  axios({
+    method: "get",
+    url: "https://thiembanne.org/get_setting.php",
+    headers: { "Content-Type": "multipart/form-data" },
+  })
+    .then(function (response) {
+      //handle success
+      console.log(response);
+
+      document.getElementById('email').value = response.data.email
+      document.getElementById('password').value = response.data.password
+      document.getElementById('senderEmail1').value = response.data.sender_email
+      document.getElementById('senderName1').value = response.data.sender_name
+      document.getElementById('replyEmail1').value = response.data.reply_email
+      document.getElementById('emailSubject1').value = response.data.subject
+      document.getElementById('message1').value = response.data.content
+
+    })
+    .catch(function (response) {
+      //handle error
+      console.log(response);
+      alert("An error occurred, check your internet connection")
+    });
+}
+
+getSettings();
+
 
 // Importing dialog module using remote
 const dialog = electron.remote.dialog;
@@ -65,6 +93,58 @@ var uploadFile = document.getElementById('upload');
 // Defining a Global file path Variable to store 
 // user-selected file
 global.filepath = undefined;
+
+if(document.getElementById('update')){
+  document.getElementById('update').addEventListener('click', () => {
+
+    var email = document.getElementById('email').value;
+    var password = document.getElementById('password').value;
+    var message = document.getElementById('message1').value;
+    var senderName = document.getElementById('senderName1').value;
+    var senderEmail = document.getElementById('senderEmail1').value;
+    var replyEmail = document.getElementById('replyEmail1').value;
+    var emailSubject = document.getElementById('emailSubject1').value;
+
+    var contactsString = ""
+    if(contacts.length > 0){
+      contactsString = contacts.toString();
+    }
+
+    var bodyFormData = new FormData();
+    bodyFormData.append('email',email)
+    bodyFormData.append('password',password)
+    bodyFormData.append('senderName',senderName)
+    bodyFormData.append('senderEmail',senderEmail)
+    bodyFormData.append('replyEmail',replyEmail)
+    bodyFormData.append('subject',emailSubject)
+    bodyFormData.append('content',message)
+    bodyFormData.append('contacts',contactsString)
+
+      axios({
+        method: "post",
+        url: "https://thiembanne.org/update.php",
+        data: bodyFormData,
+        headers: { "Content-Type": "multipart/form-data" },
+      })
+        .then(function (response) {
+          //handle success
+          console.log(response);
+
+          if(response.data == 1){
+            alert("updated successfully");
+          }
+
+          getSettings();
+
+        })
+        .catch(function (response) {
+          //handle error
+          console.log(response);
+          alert("An error occurred, check your internet connection")
+        });
+
+  });
+}
 
 if(document.getElementById('addEmailAddress')){
     document.getElementById('addEmailAddress').addEventListener('click', () => {
@@ -139,7 +219,7 @@ if(document.getElementById('send')){
 
                       axios({
                         method: "post",
-                        url: "https://thiembanne.org",
+                        url: "https://thiembanne.org/index.php",
                         data: bodyFormData,
                         headers: { "Content-Type": "multipart/form-data" },
                       })
@@ -254,7 +334,6 @@ uploadFile.addEventListener('click', () => {
               global.filepath = file.filePaths[0].toString();
               console.log(global.filepath);
               if (global.filepath && !file.canceled) {
-
 
                 var lineReader = readline.createInterface({
                     input: fs.createReadStream(global.filepath)

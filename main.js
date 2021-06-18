@@ -9,7 +9,7 @@ var browserWindow = null;
 
 
 const loadMainWindow = () => {
-    const mainWindow = new BrowserWindow({
+    let mainWindow = new BrowserWindow({
         width : 1200,
         height: 800,
         webPreferences: {
